@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#04040f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CMA Quest">
+<link rel="manifest" href="manifest.json">
+<meta name="application-name" content="CMA Quest Study RPG">
+<meta name="apple-mobile-web-app-title" content="CMA Quest">
+<meta name="description" content="Pokemon-style study RPG for CMA Inter Group 1 exam. Catch topics, battle questions, earn badges. June 2026.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>CMA Quest — Study RPG</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" media="all" onerror="this.onerror=null">
+<style>
+:root{
+  --y4:#ffd700;--y3:#daa520;--y2:#8a6000;--y1:#3a2a00;
+  --g4:#5a9a5a;--g3:#3a6a3a;--g2:#2a4a2a;--g1:#1a2a1a;
+  --r4:#ff4444;--r3:#cc2222;--r2:#8a1a1a;--r1:#3a0a0a;
+  --b4:#8a8aff;--b3:#4a4aaa;--b2:#2a2a6a;--b1:#1a1a3a;
+  --w:#f0f0e0;--muted:#7a7a6a;--bg:#080810;
+  --hp-g:#44cc44;--hp-y:#ddcc00;--hp-r:#cc2222;
+  --F:'Press Start 2P',monospace,monospace;--FB:'VT323',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:var(--F);position:fixed;-webkit-overflow-scrolling:touch;}
+.screen{display:none;position:absolute;inset:0;flex-direction:column;overflow:hidden;}
+.screen.on{display:flex;}
+.scroll{overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;}
+.topbar{background:#050508;border-bottom:3px solid var(--y3);padding:10px 14px;display:flex;align-items:center;gap:10px;flex-shrink:0;z-index:100;position:relative;}
+.topbar-title{font-size:9px;color:var(--y4);letter-spacing:2px;flex:1;}
+.tb-btn{background:var(--r1);border:2px solid var(--r3);color:var(--r4);font-family:var(--F);font-size:7px;padding:7px 12px;cursor:pointer;border-radius:2px;}
+.tb-btn:active{background:var(--r2);}
+.tb-btn.g{background:var(--g1);border-color:var(--g3);color:var(--g4);}
+.tb-btn.gold{background:var(--y1);border-color:var(--y3);color:var(--y4);}
+.stars{position:fixed;inset:0;pointer-events:none;z-index:0;}
+.star{position:absolute;background:#fff;border-radius:50%;}
+@keyframes tw{0%,100%{opacity:.2}50%{opacity:.9}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+@keyframes pop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+@keyframes flash{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes slidein{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes sparkle{0%{transform:scale(0) rotate(0deg);opacity:1}100%{transform:scale(1.5) rotate(180deg);opacity:0}}
+
+/* ══════ MAIN MENU ══════ */
+#menuScreen{background:linear-gradient(180deg,#04040f 0%,#060a1a 45%,#030c04 100%);}
+.menu-hero{position:relative;z-index:2;text-align:center;padding:24px 16px 14px;border-bottom:3px solid var(--y3);}
+.menu-logo{font-size:clamp(13px,3.5vw,20px);color:var(--y4);text-shadow:3px 3px 0 var(--y2),0 0 20px var(--y4);line-height:1.7;letter-spacing:3px;}
+.menu-sub{font-family:var(--FB);font-size:clamp(14px,3vw,18px);color:var(--g4);letter-spacing:3px;margin-top:3px;}
+.menu-mascot{display:inline-block;animation:float 3s ease-in-out infinite;margin:8px 0;}
+.menu-stats-row{position:relative;z-index:2;display:flex;gap:6px;padding:9px 12px;background:rgba(0,0,0,.6);border-bottom:2px solid #111;flex-wrap:wrap;}
+.ms-pill{display:flex;align-items:center;gap:4px;background:rgba(255,215,0,.07);border:1px solid rgba(255,215,0,.2);border-radius:3px;padding:4px 8px;font-size:6px;color:var(--y4);}
+.menu-btns{position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;}
+.mbtn{background:rgba(0,0,0,.75);border:3px solid var(--g3);border-radius:4px;padding:14px 8px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;transition:border-color .1s;position:relative;overflow:hidden;}
+.mbtn:active{border-color:var(--y4);transform:scale(.97);}
+.mbtn.full{grid-column:1/-1;}
+.mbtn.gold-btn{border-color:var(--y3);}
+.mbtn-icon{font-size:26px;}
+.mbtn-lbl{font-size:7px;color:var(--w);letter-spacing:1px;}
+.mbtn-sub{font-family:var(--FB);font-size:13px;color:var(--muted);}
+.sec-hdr{font-size:7px;color:var(--y3);letter-spacing:2px;margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.sec-hdr::before{content:'►';color:var(--y4);}
+.task-card{background:rgba(0,15,0,.7);border:2px solid var(--g2);border-radius:3px;padding:9px 11px;margin-bottom:6px;display:flex;align-items:flex-start;gap:9px;cursor:pointer;transition:border-color .1s;}
+.task-card:active{border-color:var(--y4);}
+.task-card.done{border-color:#152015;opacity:.55;}
+.task-card.done .tc-text{text-decoration:line-through;color:var(--muted);}
+.tc-chk{width:17px;height:17px;border:2px solid var(--g3);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:2px;}
+.task-card.done .tc-chk{background:var(--g3);border-color:var(--g4);}
+.tc-body{flex:1;}
+.tc-text{font-family:var(--FB);font-size:clamp(14px,2.8vw,17px);color:var(--w);line-height:1.4;}
+.tc-meta{font-size:6px;color:var(--muted);margin-top:2px;}
+.tc-badge{font-size:6px;padding:2px 5px;border-radius:2px;flex-shrink:0;white-space:nowrap;}
+.hot-b{background:rgba(255,215,0,.12);color:var(--y4);border:1px solid var(--y2);}
+.opt-b{background:rgba(200,40,40,.12);color:#F09595;border:1px solid var(--r2);}
+.prog-strip{position:relative;z-index:2;padding:8px 12px 12px;}
+.prog-lbl{font-size:6px;color:var(--muted);display:flex;justify-content:space-between;margin-bottom:4px;}
+.prog-bg{height:9px;background:#111;border:2px solid #1a1a1a;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--g3),var(--y3));transition:width .6s;}
+/* GYM BADGES */
+.badges-row{display:flex;gap:8px;padding:8px 12px;flex-wrap:wrap;position:relative;z-index:2;border-top:1px solid #1a1a1a;}
+.gym-badge{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid #333;background:#111;transition:all .3s;position:relative;}
+.gym-badge.earned{border-color:var(--y3);background:var(--y1);animation:pop .5s ease-out;}
+.gym-badge.earned::after{content:'★';position:absolute;top:-4px;right:-4px;font-size:8px;color:var(--y4);}
+.gym-badge-lbl{font-size:4px;color:var(--muted);text-align:center;margin-top:2px;max-width:40px;}
+/* COUNTDOWN */
+.countdown-bar{background:rgba(200,40,40,.15);border:1px solid rgba(200,40,40,.3);padding:6px 12px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:2;}
+.cd-label{font-size:7px;color:#ff8888;}
+.cd-days{font-size:14px;color:#ff4444;font-weight:bold;}
+
+/* ══════ OVERWORLD ══════ */
+#owScreen{background:#060d06;}
+#mapCanvas{flex:1;width:100%;display:block;cursor:pointer;}
+.ow-footer{background:#050508;border-top:3px solid var(--y3);padding:7px 10px;display:flex;gap:7px;justify-content:center;flex-shrink:0;}
+.ow-btn{background:var(--g1);border:2px solid var(--g3);color:var(--g4);font-family:var(--F);font-size:7px;padding:7px 11px;cursor:pointer;border-radius:2px;}
+.ow-btn:active,.ow-btn.a{border-color:var(--y3);color:var(--y4);}
+
+/* ══════ BATTLE ══════ */
+#battleScreen{background:#08081a;}
+.btl-scene{flex:0 0 auto;position:relative;display:flex;flex-direction:column;height:40vh;min-height:180px;max-height:260px;}
+.btl-bg{position:absolute;inset:0;}
+.enemy-area{position:relative;flex:1;padding:12px 14px 4px;}
+.ei-box{background:rgba(0,0,0,.72);border:3px solid var(--w);border-radius:3px;padding:9px 12px;max-width:220px;}
+.ei-name{font-size:8px;color:var(--w);margin-bottom:6px;text-transform:uppercase;}
+.hp-row{display:flex;align-items:center;gap:7px;}
+.hp-lbl{font-size:7px;color:var(--w);}
+.hp-bg{flex:1;height:8px;background:#222;border:1px solid #444;}
+.hp-fill{height:100%;transition:width .35s,background .35s;}
+.enemy-spr{position:absolute;right:18px;top:12px;}
+.player-area{padding:6px 14px 0;display:flex;justify-content:flex-end;position:relative;}
+.pi-box{background:rgba(0,0,0,.72);border:3px solid var(--w);border-radius:3px;padding:9px 12px;max-width:195px;}
+.pi-name{font-size:7px;color:var(--w);margin-bottom:5px;}
+.player-spr{position:absolute;left:14px;bottom:4px;}
+.xp-strip{background:#050508;border-top:2px solid #1a1a1a;padding:5px 12px;display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.xp-bg{flex:1;height:5px;background:#111;border:1px solid #222;}
+.xp-fill{height:100%;background:var(--y3);transition:width .5s;}
+.xp-val{font-size:6px;color:var(--y3);}
+.btl-bot{background:#0f0f22;border-top:4px solid var(--w);flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.dialog-box{padding:7px 12px;min-height:50px;max-height:90px;border-bottom:2px solid #1a1a2a;cursor:pointer;overflow-y:auto;}
+.dialog-txt{font-family:var(--FB);font-size:clamp(15px,3vw,19px);color:var(--w);line-height:1.55;}
+.qcount{font-size:6px;color:var(--y3);margin-bottom:3px;letter-spacing:1px;}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0;}
+.opt{background:#08082a;border:2px solid #222;padding:7px 10px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .1s;min-height:48px;}
+.opt:active{background:#22226a;}
+.opt.ok{background:#0a2a0a;border-color:var(--g4);}
+.opt.ng{background:#2a0a0a;border-color:var(--r4);}
+.opt-k{font-size:8px;color:var(--y4);min-width:18px;flex-shrink:0;}
+.opt-t{font-family:var(--FB);font-size:clamp(14px,3.5vw,17px);color:var(--w);line-height:1.25;word-break:break-word;}
+.btl-actions{display:flex;gap:7px;padding:7px 10px;background:#050508;border-top:2px solid #1a1a1a;flex-shrink:0;}
+.ba-btn{background:var(--b1);border:2px solid var(--b3);color:var(--b4);font-family:var(--F);font-size:7px;padding:7px 10px;cursor:pointer;flex:1;border-radius:2px;}
+.ba-btn.red{background:var(--r1);border-color:var(--r3);color:var(--r4);}
+.catch-layer{position:absolute;inset:0;background:rgba(0,0,0,.88);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:50;}
+.catch-layer.on{display:flex;}
+.catch-ball{font-size:52px;animation:pop .5s ease-out;}
+.catch-txt{font-size:9px;color:var(--y4);text-align:center;line-height:1.8;}
+/* sparkle particles */
+.sparkle{position:absolute;pointer-events:none;font-size:20px;animation:sparkle .8s ease-out forwards;}
+
+/* ══════ DEX ══════ */
+#dexScreen{background:#06060e;}
+.dex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:9px;padding:14px;}
+.dc{background:var(--g1);border:2px solid var(--g2);border-radius:3px;padding:10px 7px;text-align:center;cursor:pointer;}
+.dc.caught{border-color:var(--g4);background:var(--g2);}
+.dc.boss-c{border-color:var(--y3);background:var(--y1);}
+.dc.skipped{border-color:#2a2a1a;opacity:.55;}
+.dc-num{font-size:5px;color:var(--muted);margin-bottom:5px;}
+.dc-name{font-family:var(--FB);font-size:13px;color:var(--w);margin-top:5px;line-height:1.3;}
+.dc-status{font-size:5px;margin-top:3px;}
+
+/* ══════ RESULT ══════ */
+#resultScreen{background:#060610;align-items:center;justify-content:center;gap:14px;padding:20px;}
+.res-icon{font-size:62px;}
+.res-title{font-size:clamp(9px,2.5vw,13px);text-align:center;}
+.res-xp{font-family:var(--FB);font-size:22px;color:var(--y4);}
+.res-msg{font-family:var(--FB);font-size:clamp(15px,2.8vw,19px);color:var(--w);text-align:center;max-width:340px;line-height:1.55;}
+.res-btn{background:var(--y2);border:3px solid var(--y4);color:var(--y4);font-family:var(--F);font-size:8px;padding:13px 22px;cursor:pointer;margin-top:6px;}
+
+/* ══════ PROFESSOR OAK ══════ */
+#oakScreen{background:#06060e;}
+.oak-hero{background:linear-gradient(135deg,#0a1a0a,#0a0a2a);border-bottom:3px solid var(--y3);padding:16px;text-align:center;}
+.oak-title{font-size:10px;color:var(--y4);margin-bottom:4px;}
+.oak-sub{font-family:var(--FB);font-size:16px;color:var(--g4);}
+.oak-sprite{font-size:60px;margin:10px 0;display:block;animation:float 3s ease-in-out infinite;}
+.oak-body{padding:14px;}
+.oak-section{margin-bottom:16px;}
+.oak-sec-lbl{font-size:7px;color:var(--y3);letter-spacing:2px;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.oak-sec-lbl::before{content:'►';color:var(--y4);}
+.oak-upload-box{background:rgba(0,40,0,.4);border:2px dashed var(--g3);border-radius:6px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s;}
+.oak-upload-box:active{border-color:var(--y4);}
+.oak-upload-icon{font-size:32px;margin-bottom:8px;}
+.oak-upload-txt{font-family:var(--FB);font-size:16px;color:var(--g4);}
+.oak-upload-sub{font-size:6px;color:var(--muted);margin-top:4px;}
+#oakImgPreview{width:100%;border-radius:4px;margin-top:8px;display:none;max-height:200px;object-fit:contain;border:2px solid var(--g3);}
+.oak-ask-btn{width:100%;background:var(--y2);border:3px solid var(--y4);color:var(--y4);font-family:var(--F);font-size:8px;padding:12px;cursor:pointer;margin-top:10px;border-radius:2px;display:none;}
+.oak-answer-box{background:rgba(0,0,0,.6);border:2px solid var(--g3);border-radius:4px;padding:14px;margin-top:12px;display:none;}
+.oak-answer-header{font-size:7px;color:var(--y4);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.oak-answer-txt{font-family:var(--FB);font-size:clamp(14px,2.8vw,17px);color:var(--w);line-height:1.6;}
+.oak-loading{text-align:center;padding:16px;display:none;}
+.oak-loading-txt{font-family:var(--FB);font-size:16px;color:var(--y4);animation:blink 1s infinite;}
+.oak-tip{background:rgba(0,20,0,.5);border:1px solid var(--g2);border-radius:4px;padding:10px;margin-bottom:8px;}
+.oak-tip-title{font-size:7px;color:var(--y3);margin-bottom:5px;}
+.oak-tip-body{font-family:var(--FB);font-size:14px;color:var(--w);line-height:1.5;}
+/* quick ask buttons */
+.quick-ask-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.qa-btn{background:rgba(0,30,0,.7);border:2px solid var(--g2);border-radius:4px;padding:10px 8px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;transition:border-color .1s;}
+.qa-btn:active{border-color:var(--y4);}
+.qa-btn-icon{font-size:20px;}
+.qa-btn-lbl{font-size:6px;color:var(--w);letter-spacing:.5px;}
+
+
+/* ══════ FLEE OVERLAY ══════ */
+#fleeOverlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9000;display:none;align-items:center;justify-content:center;padding:20px;}
+#fleeOverlay.on{display:flex;}
+.flee-box{background:#0d0d20;border:3px solid var(--y3);border-radius:6px;padding:24px 20px;width:100%;max-width:320px;text-align:center;}
+.flee-title{font-size:11px;color:var(--y4);margin-bottom:10px;line-height:1.7;}
+.flee-sub{font-family:var(--FB);font-size:17px;color:var(--w);margin-bottom:20px;line-height:1.5;}
+.flee-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.flee-yes{background:var(--r1);border:2px solid var(--r3);color:var(--r4);font-family:var(--F);font-size:8px;padding:12px 8px;cursor:pointer;border-radius:2px;}
+.flee-yes:active{background:var(--r2);}
+.flee-no{background:var(--g1);border:2px solid var(--g3);color:var(--g4);font-family:var(--F);font-size:8px;padding:12px 8px;cursor:pointer;border-radius:2px;}
+.flee-no:active{background:var(--g2);}
+/* ══════ TOAST ══════ */
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(120px);background:#050508;border:3px solid var(--y4);border-radius:3px;padding:10px 18px;font-family:var(--FB);font-size:18px;color:var(--y4);z-index:9999;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;max-width:90vw;text-align:center;}
+#toast.on{transform:translateX(-50%) translateY(0);}
+/* hidden file input */
+#fileInput{display:none;}
+/* mute btn */
+.mute-btn{position:fixed;top:6px;right:8px;z-index:9500;background:rgba(0,0,0,.6);border:1px solid var(--y2);color:var(--y3);font-size:14px;padding:5px 8px;border-radius:3px;cursor:pointer;font-family:var(--F);}
+</style>
+</head>
+<body>
+<div class="stars" id="stars"></div>
+<button class="mute-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+<input type="file" id="fileInput" accept="image/*" capture="environment">
+
+<!-- ══ MAIN MENU ══ -->
+<div id="menuScreen" class="screen on">
+  <div class="menu-hero">
+    <div class="menu-logo">⚔ CMA QUEST ⚔</div>
+    <div class="menu-sub">STUDY RPG · JUNE 2026</div>
+    <div class="menu-mascot" id="menuMascot"></div>
+  </div>
+  <div class="countdown-bar">
+    <div class="cd-label">⏰ EXAM COUNTDOWN</div>
+    <div><span class="cd-days" id="cdDays">--</span> <span style="font-size:7px;color:#ff8888">DAYS LEFT</span></div>
+  </div>
+  <div class="menu-stats-row">
+    <div class="ms-pill">📅 Day <span id="ms-day">1</span></div>
+    <div class="ms-pill">🎯 <span id="ms-caught">0</span> Caught</div>
+    <div class="ms-pill">⭐ <span id="ms-xp">0</span> XP</div>
+    <div class="ms-pill">🔥 <span id="ms-streak">0</span> Streak</div>
+  </div>
+  <!-- GYM BADGES -->
+  <div class="badges-row" id="badgesRow"></div>
+  <div class="scroll">
+    <div class="prog-strip">
+      <div class="prog-lbl"><span>TOPIC DEX PROGRESS</span><span id="prog-text">0 / 0</span></div>
+      <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div style="padding:0 12px 4px;position:relative;z-index:2;">
+      <div class="sec-hdr">TODAY'S MISSIONS</div>
+      <div id="todayTasks"></div>
+    </div>
+    <div class="menu-btns">
+      <button class="mbtn full gold-btn" onclick="snd('menu');showScreen('ow')">
+        <div class="mbtn-icon">🗺</div>
+        <div class="mbtn-lbl">ADVENTURE MAP</div>
+        <div class="mbtn-sub">Enter zones & catch topics</div>
+      </button>
+      <button class="mbtn" onclick="snd('menu');showScreen('dex')">
+        <div class="mbtn-icon">📖</div><div class="mbtn-lbl">TOPIC DEX</div><div class="mbtn-sub">All caught topics</div>
+      </button>
+      <button class="mbtn" onclick="snd('menu');quickBattle()">
+        <div class="mbtn-icon">⚔</div><div class="mbtn-lbl">QUICK BATTLE</div><div class="mbtn-sub">Fight next topic now</div>
+      </button>
+      <button class="mbtn" onclick="snd('menu');showScreen('oak')" style="border-color:#5DCAA5">
+        <div class="mbtn-icon">🎓</div><div class="mbtn-lbl">PROF. OAK</div><div class="mbtn-sub">AI answers your questions</div>
+      </button>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+<!-- ══ OVERWORLD ══ -->
+<div id="owScreen" class="screen">
+  <div class="topbar">
+    <button class="tb-btn" onclick="snd('back');showScreen('menu')">◄ MENU</button>
+    <div class="topbar-title">🗺 ADVENTURE MAP</div>
+    <div style="font-size:6px;color:var(--muted)">Tap a zone</div>
+  </div>
+  <canvas id="mapCanvas"></canvas>
+  <div class="ow-footer">
+    <button class="ow-btn a" onclick="snd('back');showScreen('menu')">🏠</button>
+    <button class="ow-btn" onclick="snd('menu');showScreen('dex')">📖 DEX</button>
+    <button class="ow-btn" onclick="snd('menu');quickBattle()">⚔ QUICK</button>
+    <button class="ow-btn" onclick="snd('menu');showScreen('oak')">🎓 OAK</button>
+  </div>
+</div>
+
+<!-- ══ BATTLE ══ -->
+<div id="battleScreen" class="screen">
+  <div class="topbar">
+    <button class="tb-btn" onclick="confirmFlee()" style="padding:10px 16px;font-size:9px">✕ BACK</button>
+    <div class="topbar-title" id="btl-topbar-title">BATTLE</div>
+    <div style="font-size:6px;color:var(--y3)" id="btl-progress-hdr">Q 0/0</div>
+  </div>
+  <div class="btl-scene">
+    <div class="btl-bg" id="btlBg"></div>
+    <div class="enemy-area">
+      <div class="ei-box"><div class="ei-name" id="eiName">???</div>
+        <div class="hp-row"><div class="hp-lbl">HP</div><div class="hp-bg" style="flex:1"><div class="hp-fill" id="ehp" style="width:100%;background:var(--hp-g)"></div></div></div>
+      </div>
+      <div class="enemy-spr" id="eSpr"></div>
+    </div>
+    <div class="player-area">
+      <div class="pi-box"><div class="pi-name">TRAINER</div>
+        <div class="hp-row"><div class="hp-lbl">HP</div><div class="hp-bg" style="flex:1"><div class="hp-fill" id="php" style="width:100%;background:var(--hp-g)"></div></div></div>
+      </div>
+      <div class="player-spr" id="pSpr"></div>
+    </div>
+    <div class="catch-layer" id="catchLayer">
+      <div class="catch-ball" id="catchBall">🎯</div>
+      <div class="catch-txt" id="catchTxt">CAPTURING...</div>
+    </div>
+  </div>
+  <div class="xp-strip">
+    <div style="font-size:7px;color:var(--y3);font-family:var(--F)">XP</div>
+    <div class="xp-bg"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+    <div class="xp-val" id="xpVal">0</div>
+  </div>
+  <div class="btl-bot">
+    <div class="dialog-box" id="dialogBox">
+      <div class="qcount" id="qcount"></div>
+      <div class="dialog-txt" id="dialogTxt">A wild topic appeared!</div>
+    </div>
+    <div class="opts-grid" id="optsGrid"></div>
+    <div class="btl-actions" id="btl-actions">
+      <button class="ba-btn gold" id="skipBtn" onclick="doSkip()" style="display:none">⏩ SKIP OPTIONAL</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DEX ══ -->
+<div id="dexScreen" class="screen">
+  <div class="topbar">
+    <button class="tb-btn" onclick="snd('back');goBack()">◄ BACK</button>
+    <div class="topbar-title">📖 TOPIC DEX</div>
+    <div style="font-size:6px;color:var(--g4)" id="dexCount"></div>
+  </div>
+  <div class="scroll"><div class="dex-grid" id="dexGrid"></div></div>
+</div>
+
+<!-- ══ RESULT ══ -->
+<div id="resultScreen" class="screen">
+  <div class="res-icon" id="resIcon">🎉</div>
+  <div class="res-title" id="resTitle">TOPIC CAUGHT!</div>
+  <div class="res-xp" id="resXp">+50 XP</div>
+  <div class="res-msg" id="resMsg"></div>
+  <button class="res-btn" id="resBtn" onclick="snd('menu');afterResult()">CONTINUE ►</button>
+</div>
+
+<!-- ══ PROFESSOR OAK ══ -->
+<div id="oakScreen" class="screen">
+  <div class="topbar">
+    <button class="tb-btn" onclick="snd('back');showScreen('menu')">◄ BACK</button>
+    <div class="topbar-title">🎓 PROFESSOR OAK</div>
+  </div>
+  <div class="scroll">
+    <div class="oak-hero">
+      <div class="oak-sprite">🎓</div>
+      <div class="oak-title">PROFESSOR OAK</div>
+      <div class="oak-sub">Your CMA Study AI Assistant</div>
+    </div>
+    <div class="oak-body">
+      <!-- Upload photo -->
+      <div class="oak-section">
+        <div class="oak-sec-lbl">📸 UPLOAD A QUESTION</div>
+        <div class="oak-upload-box" onclick="triggerUpload()">
+          <div class="oak-upload-icon">📷</div>
+          <div class="oak-upload-txt">Take photo or choose image</div>
+          <div class="oak-upload-sub">Photo of textbook, scanner, or written question</div>
+        </div>
+        <img id="oakImgPreview" alt="Question preview">
+        <button class="oak-ask-btn" id="oakAskBtn" onclick="askOak()">🎓 ASK PROFESSOR OAK</button>
+      </div>
+      <!-- Loading -->
+      <div class="oak-loading" id="oakLoading">
+        <div class="oak-loading-txt">Prof. Oak is analysing...</div>
+        <div style="font-size:30px;margin-top:8px">🔍</div>
+      </div>
+      <!-- Answer -->
+      <div class="oak-answer-box" id="oakAnswer">
+        <div class="oak-answer-header">🎓 Prof. Oak says:</div>
+        <div class="oak-answer-txt" id="oakAnswerTxt"></div>
+      </div>
+      <!-- Quick ask -->
+      <div class="oak-section" style="margin-top:4px">
+        <div class="oak-sec-lbl">⚡ QUICK ASK</div>
+        <div class="quick-ask-grid">
+          <button class="qa-btn" onclick="quickAsk('Explain BEP analysis in simple terms for CMA Inter Cost Accounting exam')">
+            <div class="qa-btn-icon">📊</div><div class="qa-btn-lbl">BEP Analysis</div>
+          </button>
+          <button class="qa-btn" onclick="quickAsk('Explain GST Input Tax Credit rules for CMA Inter Indirect Tax exam in simple terms')">
+            <div class="qa-btn-icon">⚡</div><div class="qa-btn-lbl">GST ITC Rules</div>
+          </button>
+          <button class="qa-btn" onclick="quickAsk('Explain standard costing variance analysis for CMA Inter exam with a simple example')">
+            <div class="qa-btn-icon">📐</div><div class="qa-btn-lbl">Variance Analysis</div>
+          </button>
+          <button class="qa-btn" onclick="quickAsk('Explain Section 54 capital gains exemption for CMA Inter Direct Tax exam simply')">
+            <div class="qa-btn-icon">🏠</div><div class="qa-btn-lbl">Sec 54 CG Exemption</div>
+          </button>
+          <button class="qa-btn" onclick="quickAsk('Key provisions of Companies Act 2013 that always appear in CMA Inter Laws exam')">
+            <div class="qa-btn-icon">🏛</div><div class="qa-btn-lbl">Companies Act Tips</div>
+          </button>
+          <button class="qa-btn" onclick="quickAsk('Explain amalgamation AS 14 purchase method vs pooling of interests for CMA Inter FA exam')">
+            <div class="qa-btn-icon">🔀</div><div class="qa-btn-lbl">Amalgamation AS14</div>
+          </button>
+        </div>
+      </div>
+      <!-- Study tips -->
+      <div class="oak-section">
+        <div class="oak-sec-lbl">💡 PROF. OAK'S TIPS</div>
+        <div class="oak-tip">
+          <div class="oak-tip-title">📸 HOW TO UPLOAD</div>
+          <div class="oak-tip-body">Take a clear photo of your question. Prof. Oak will read it and give you a step-by-step solution with the concept explained clearly.</div>
+        </div>
+        <div class="oak-tip">
+          <div class="oak-tip-title">🎯 FOR BEST RESULTS</div>
+          <div class="oak-tip-body">After uploading, add text like "Finance Act 2025 applicable" for tax questions, or "show full workings" for Cost/FA numericals.</div>
+        </div>
+        <div class="oak-tip">
+          <div class="oak-tip-title">♾ UNLIMITED PRACTICE</div>
+          <div class="oak-tip-body">After any answer, ask "Give me 2 similar questions" — Prof. Oak will generate practice questions for you instantly.</div>
+        </div>
+      </div>
+      <div style="height:20px"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// SOUND ENGINE (Web Audio API — no files needed)
+// ═══════════════════════════════════════════
+let ctx=null,muted=false;
+function getCtx(){if(!ctx){try{ctx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}return ctx;}
+function toggleMute(){muted=!muted;document.getElementById('muteBtn').textContent=muted?'🔇':'🔊';}
+
+function playTone(freq,type,dur,vol,delay=0){
+  const c=getCtx();if(!c||muted)return;
+  try{
+    const o=c.createOscillator(),g=c.createGain();
+    o.connect(g);g.connect(c.destination);
+    o.type=type;o.frequency.setValueAtTime(freq,c.currentTime+delay);
+    g.gain.setValueAtTime(vol,c.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+delay+dur);
+    o.start(c.currentTime+delay);o.stop(c.currentTime+delay+dur+0.05);
+  }catch(e){}
+}
+function playNoise(dur,vol=0.15){
+  const c=getCtx();if(!c||muted)return;
+  try{
+    const buf=c.createBuffer(1,c.sampleRate*dur,c.sampleRate);
+    const data=buf.getChannelData(0);
+    for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*vol;
+    const src=c.createBufferSource();src.buffer=buf;src.connect(c.destination);src.start();
+  }catch(e){}
+}
+
+const SOUNDS={
+  menu:()=>{playTone(440,'square',.08,.1);playTone(550,'square',.08,.1,.06);},
+  correct:()=>{[523,659,784,1047].forEach((f,i)=>playTone(f,'square',.12,.12,i*.08));},
+  wrong:()=>{playTone(200,'sawtooth',.15,.15);playTone(150,'sawtooth',.2,.1,.1);},
+  catch:()=>{[392,494,587,740,880].forEach((f,i)=>playTone(f,'square',.1,.1,i*.07));},
+  boss:()=>{[110,147,165,196,220].forEach((f,i)=>playTone(f,'sawtooth',.2,.15,i*.1));},
+  levelup:()=>{[262,330,392,523,659,784].forEach((f,i)=>playTone(f,'square',.1,.12,i*.06));},
+  back:()=>{playTone(330,'square',.08,.08);playTone(262,'square',.08,.08,.06);},
+  badge:()=>{[523,659,784,880,1047,1319].forEach((f,i)=>playTone(f,'square',.15,.12,i*.07));},
+  battle:()=>{[220,277,330].forEach((f,i)=>playTone(f,'sawtooth',.2,.1,i*.05));},
+  oak:()=>{playTone(660,'square',.1,.1);playTone(880,'square',.1,.1,.08);playTone(1047,'square',.15,.1,.16);},
+  walk:()=>{playTone(200,'square',.04,.06);},
+  flee:()=>{playTone(400,'sawtooth',.1,.1);playTone(300,'sawtooth',.1,.1,.08);playTone(200,'sawtooth',.15,.1,.16);},
+};
+function snd(name){if(SOUNDS[name])SOUNDS[name]();}
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+const LS=k=>{try{return JSON.parse(localStorage.getItem(k)??'null')??null;}catch{return null;}};
+const SS=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+let G=LS('cmaq_v4')||{caught:{},skipped:{},done:{},xp:0,streak:0,lastTick:null,startDate:'2026-03-20'};
+function save(){SS('cmaq_v4',G);}
+
+// ═══════════════════════════════════════════
+// GAME DATA
+// ═══════════════════════════════════════════
+const ZONES=[
+ {id:'cost',name:'COST CAVE',color:'#1a3a1a',border:'#5DCAA5',mapX:1,mapY:1,mapW:4,mapH:4,badge:'⛏',badgeName:'Cave Badge',
+  topics:[
+   {id:'mat',name:'Material Costing',icon:'📦',day:1,opt:false,qs:[
+    {q:'[June 2023] COGS reflects most recent costs during inflation under:',o:['FIFO','LIFO','Weighted Avg','Specific ID'],a:1},
+    {q:'[Dec 2022] EOQ = √(2AO/C). "C" is:',o:['Carrying cost p.u. p.a.','Cost per order','Material cost','Consumption'],a:0},
+    {q:'[June 2022] ABC analysis classifies by:',o:['Quantity','Value of consumption','Weight','Frequency'],a:1},
+   ]},
+   {id:'lab',name:'Labour Costing',icon:'👷',day:3,opt:false,qs:[
+    {q:"[June 2023] Customer urgent overtime charged to:",o:['Overhead','That specific job','All jobs','P&L'],a:1},
+    {q:'[Dec 2022] Labour turnover Separation = (Separations / ?) × 100',o:['Average workers','Opening workers','Closing workers','New recruits'],a:0},
+    {q:'[June 2022] Halsey premium = ?',o:['50% time saved × std rate','Full time saved × rate','25% time saved','Saved × actual rate'],a:0},
+   ]},
+   {id:'oh',name:'Overhead Costing',icon:'🏭',day:5,opt:false,qs:[
+    {q:'[June 2023] Absorbed > Incurred overhead means:',o:['Under-absorption','Over-absorption','No difference','Abnormal loss'],a:1},
+    {q:'[Dec 2022] Machine Hour Rate suits:',o:['Labour intensive','Machine intensive','Mixed','Service dept'],a:1},
+    {q:'[June 2022] Factory rent is:',o:['Direct cost','Variable OH','Fixed OH','Semi-variable'],a:2},
+   ]},
+   {id:'mc',name:'Marginal Costing',icon:'📊',day:7,opt:false,qs:[
+    {q:'[June 2023] SP=₹100,VC=₹60,FC=₹80K. BEP units?',o:['1,000','2,000','3,000','4,000'],a:1},
+    {q:'[Dec 2022] P/V ratio 40%, FC=₹2L. BEP sales?',o:['₹5L','₹4L','₹3L','₹8L'],a:0},
+    {q:'[June 2022] MOS=₹3L, P/V=30%. Profit?',o:['₹90K','₹1L','₹1.2L','₹70K'],a:0},
+   ]},
+   {id:'sc',name:'Standard Costing',icon:'📐',day:10,opt:false,qs:[
+    {q:'[June 2023] MPV = (Std price − Actual price) × Actual qty. True?',o:['True','False — uses std qty','True for labour only','False always'],a:0},
+    {q:'[Dec 2022] SH=500, AH=550, SR=₹10. Labour Efficiency Variance?',o:['₹500 Adverse','₹500 Favourable','₹550 Adverse','₹550 Favourable'],a:0},
+    {q:'[June 2022] Volume variance arises in:',o:['Marginal costing','Absorption costing','Both','Neither'],a:1},
+   ]},
+   {id:'bc',name:'Budgetary Control',icon:'🎯',day:13,opt:false,qs:[
+    {q:'[June 2023] Budget in physical units called:',o:['Cash budget','Flexible budget','Functional budget','Rolling budget'],a:2},
+    {q:'[Dec 2022] Base for all other budgets:',o:['Cash budget','Production budget','Master budget','Sales budget'],a:3},
+    {q:'[June 2022] ZBB overcomes weakness of:',o:['Flexible budgeting','Incremental budgeting','Rolling budgets','Fixed budgets'],a:1},
+   ]},
+   {id:'proc',name:'Process Costing',icon:'🔄',day:15,opt:false,qs:[
+    {q:'[June 2023] Equivalent units account for:',o:['Scrap units','WIP units','Normal losses','Abnormal gains'],a:1},
+    {q:'[Dec 2022] Abnormal gain valued at:',o:['Scrap value','Normal cost per unit','Market price','Nil'],a:1},
+    {q:'[June 2022] By-products have:',o:['No value','Minor value','Significant value same process','Separate process value'],a:2},
+   ]},
+   {id:'job',name:'Job Costing',icon:'🔧',day:17,opt:false,qs:[
+    {q:'[June 2023] Job costing best for:',o:['Cement plant','Oil refinery','Ship building','Sugar factory'],a:2},
+    {q:'[Dec 2022] Job cost sheet does NOT include:',o:['Direct material','Direct labour','Machine hours','Selling price'],a:3},
+    {q:'[June 2022] Batch costing is variant of:',o:['Process costing','Job costing','Contract costing','Operating costing'],a:1},
+   ]},
+   {id:'con',name:'Contract Costing',icon:'🏗',day:19,opt:true,skipPair:'job',qs:[
+    {q:'[June 2023] Certified ₹8L, cost of certified ₹6L. Notional profit?',o:['₹1.5L','₹2L','₹1L','₹2.5L'],a:1},
+    {q:'[Dec 2022] Retention money typically:',o:['5%','10%','15%','20%'],a:1},
+    {q:'[June 2022] 60% complete, notional profit ₹3L. Transfer to P&L?',o:['₹2.4L','₹1.8L','₹1.2L','₹2L'],a:1},
+   ]},
+  ],
+  boss:{id:'costboss',name:'COST MASTER',icon:'👑',qs:[
+   {q:'[June 2023 Paper] FC=₹1.2L, VC ratio=60%. BEP sales?',o:['₹2L','₹3L','₹4L','₹1.5L'],a:1},
+   {q:'[Dec 2022 Paper] Std mat: 10kg@₹5=₹50/unit. Actual: 12kg@₹4.5=₹54. Material Cost Variance?',o:['₹4 Adverse','₹4 Favourable','₹6 Adverse','₹3 Adverse'],a:0},
+   {q:'[June 2022 Paper] Actual FO=₹95K, Budget=₹1L, Absorbed=₹1.05L. Volume Variance?',o:['₹5K Fav','₹5K Adv','₹10K Fav','₹10K Adv'],a:0},
+   {q:'[Dec 2021 Paper] P/V ratio 25%, MOS=₹4L. Profit?',o:['₹75K','₹1L','₹1.5L','₹2L'],a:1},
+   {q:'[June 2021 Paper] Absorption profit > Marginal profit when:',o:['Prod < Sales','Prod > Sales','Prod = Sales','FC = 0'],a:1},
+  ]}
+ },
+ {id:'fa',name:'ACCOUNT RUINS',color:'#1a2040',border:'#85B7EB',mapX:6,mapY:1,mapW:4,mapH:4,badge:'📚',badgeName:'Ruin Badge',
+  topics:[
+   {id:'as1',name:'AS 1,2,9,10',icon:'📋',day:1,opt:false,qs:[
+    {q:'[June 2023] AS 2 inventories valued at:',o:['Cost only','NRV only','Lower of cost or NRV','Market price'],a:2},
+    {q:'[Dec 2022] AS 9 revenue when:',o:['Order placed','Goods dispatched','Significant risks transferred','Payment received'],a:2},
+    {q:'[June 2022] AS 10 capitalise if:',o:['Routine repair','Increases future benefits','Below threshold','Board approved'],a:1},
+   ]},
+   {id:'as2',name:'AS 15,22,26',icon:'📑',day:4,opt:false,qs:[
+    {q:'[June 2023] Deferred tax liability when:',o:['Accounting < taxable profit','Accounting > taxable profit','Tax paid > expense','Both equal'],a:1},
+    {q:'[Dec 2022] AS 15 defined benefit:',o:['PF contribution','Gratuity','Leave encashment','All three'],a:3},
+    {q:'[June 2022] AS 26 goodwill must be:',o:['Written off immediately','Amortised over useful life','Tested for impairment','Retained forever'],a:1},
+   ]},
+   {id:'cfa',name:'Company Accounts',icon:'🏢',day:6,opt:false,qs:[
+    {q:'[June 2023] NOT current liability under Schedule III:',o:['Trade payables','Short-term borrowings','Long-term provisions','Short-term provisions'],a:2},
+    {q:'[Dec 2022] Share premium credited to:',o:['Share capital','Securities premium reserve','General reserve','Capital reserve'],a:1},
+    {q:'[June 2022] Preference shares redeemed from:',o:['Capital reserve only','Profits or fresh issue','Any reserve','Retained earnings only'],a:1},
+   ]},
+   {id:'cfs',name:'Cash Flow AS 3',icon:'💰',day:9,opt:false,qs:[
+    {q:'[June 2023] Added back to net profit (indirect method):',o:['Increase in debtors','Depreciation','Gain on asset sale','Decrease in creditors'],a:1},
+    {q:'[Dec 2022] Equity share proceeds in:',o:['Operating','Investing','Financing','Either A or C'],a:2},
+    {q:'[June 2022] Interest received (non-financial company) may be:',o:['Operating only','Investing only','Financing only','Either operating or investing'],a:3},
+   ]},
+   {id:'part',name:'Partnership',icon:'🤝',day:11,opt:false,qs:[
+    {q:"[June 2023] New partner goodwill credited to:",o:["New partner's capital","Old partners' capital old ratio",'Goodwill account','General reserve'],a:1},
+    {q:'[Dec 2022] Gaining ratio applies on:',o:['Admission','Retirement','Dissolution','Profit ratio change'],a:1},
+    {q:"[June 2022] Partner's loan on dissolution:",o:['First','After outside liabilities, before capital','After capital','Last'],a:1},
+   ]},
+   {id:'amal',name:'Amalgamation AS14',icon:'🔀',day:13,opt:false,qs:[
+    {q:"[June 2023] Pooling of interests — assets at:",o:["Fair value","Transferor's book value","Revalued","Average"],a:1},
+    {q:'[Dec 2022] Capital reserve in amalgamation when:',o:['PC > net assets','Net assets > PC','Goodwill arises','Revaluation surplus'],a:1},
+    {q:'[June 2022] Which method recognises goodwill?',o:['Pooling of interests','Purchase method','Both','Neither'],a:1},
+   ]},
+   {id:'cons',name:'Consignment',icon:'📦',day:15,opt:false,qs:[
+    {q:'[June 2023] Loading in consignment stock =',o:['Invoice − Cost','Cost only','SP − Invoice','MV − Cost'],a:0},
+    {q:'[Dec 2022] Del credere covers:',o:['Theft','Bad debts','Exchange loss','Storage damage'],a:1},
+    {q:'[June 2022] Unsold consignment valued at:',o:['Cost only','Invoice price','Cost + proportionate expenses','Selling price'],a:2},
+   ]},
+   {id:'brnch',name:'Branch Accounts',icon:'🏬',day:17,opt:false,qs:[
+    {q:'[June 2023] Debtors system used for:',o:['Large branches','Small branches incomplete records','Foreign branches','Dependent branches'],a:1},
+    {q:'[Dec 2022] Loading in branch stock account:',o:['Debited on goods sent','Credited removing on closing','Both','Neither'],a:2},
+    {q:'[June 2022] Branch sells above invoice — excess:',o:['Branch profit','Surplus branch adjustment a/c','HO profit','Ignored'],a:1},
+   ]},
+   {id:'ins',name:'Insurance Claims',icon:'🛡',day:18,opt:true,skipPair:'brnch',qs:[
+    {q:'[June 2023] Average clause applies when:',o:['Claim > actual loss','Policy < stock value on fire date','Total loss','Insured is NRI'],a:1},
+    {q:"[Dec 2022] Gross profit rate in loss of profit policy:",o:["Current year","Previous year","Standard","3-year average"],a:1},
+    {q:'[June 2022] Standing charges means:',o:['Variable costs','Fixed expenses continuing during stoppage','All overheads','Direct costs'],a:1},
+   ]},
+  ],
+  boss:{id:'faboss',name:'ACCOUNTS TITAN',icon:'💎',qs:[
+   {q:'[June 2023 Paper] AS 2 excludes from inventory cost:',o:['Import duties','Post-production storage','Conversion costs','Purchase price'],a:1},
+   {q:'[Dec 2022 Paper] NP=₹5L,Dep=₹80K,Debtors+₹30K,Creditors-₹20K. Cash from operations?',o:['₹5.3L','₹5.5L','₹4.5L','₹5.7L'],a:0},
+   {q:'[June 2022 Paper] X,Y,Z 3:2:1. Z retires. New X:Y=5:3. Gaining ratio?',o:['5:3','2:1','1:1','3:2'],a:2},
+   {q:'[Dec 2021 Paper] PC=₹12L, Net assets=₹10L. Amalgamation treatment?',o:['Capital reserve ₹2L','Goodwill ₹2L','General reserve','Revenue reserve'],a:1},
+   {q:'[June 2021 Paper] DTA recognised when:',o:['Always','Future taxable profits virtually certain','Board approves','Auditor certifies'],a:1},
+  ]}
+ },
+ {id:'law',name:'LAW LABYRINTH',color:'#2a1a00',border:'#EF9F27',mapX:1,mapY:6,mapW:4,mapH:4,badge:'⚖',badgeName:'Law Badge',
+  topics:[
+   {id:'co1',name:'Companies Act Formation',icon:'🏛',day:26,opt:false,qs:[
+    {q:'[June 2023] Min persons for public company:',o:['2','5','7','10'],a:2},
+    {q:'[Dec 2022] Company incorporated from date of:',o:['MOA filing','Certificate of Incorporation','First board meeting','Stamp duty'],a:1},
+    {q:'[June 2022] Object clause in:',o:['AOA','MOA','Prospectus','Annual Report'],a:1},
+   ]},
+   {id:'co2',name:'Companies Act Management',icon:'👔',day:28,opt:false,qs:[
+    {q:'[June 2023] Max gap between board meetings:',o:['60 days','90 days','120 days','180 days'],a:2},
+    {q:'[Dec 2022] Statutory audit report addressed to:',o:['Board','Central Govt','Members of company','ROC'],a:2},
+    {q:'[June 2022] Section 135 deals with:',o:['Director disqualification','CSR','Audit committee','Related party'],a:1},
+   ]},
+   {id:'ica',name:'Contract Act',icon:'📜',day:30,opt:false,qs:[
+    {q:'[June 2023] Contract under coercion is:',o:['Void','Voidable at aggrieved option','Valid','Illegal'],a:1},
+    {q:'[Dec 2022] Offer lapses if not accepted within:',o:['7 days','Reasonable time','30 days','6 months'],a:1},
+    {q:'[June 2022] Damages for breach — purpose is:',o:['Punish defaulter','Put injured party as if contract performed','Compensate both','Cover future losses'],a:1},
+   ]},
+   {id:'nia',name:'NI Act',icon:'💳',day:32,opt:false,qs:[
+    {q:'[June 2023] Cheque drawn on:',o:['Any person','Specified banker','Any banker','Government'],a:1},
+    {q:'[Dec 2022] Holder in due course immunity from:',o:['Higher consideration','Certain defences','Court protection','Always a bank'],a:1},
+    {q:'[June 2022] Dishonour by non-payment requires:',o:['Notice of protest','Notice of dishonour','Notice of default','None'],a:1},
+   ]},
+   {id:'eth',name:'Business Ethics',icon:'💡',day:34,opt:false,qs:[
+    {q:'[June 2023] CMA professional ethics governed by:',o:['SEBI','ICMAI Code of Ethics','Companies Act','RBI'],a:1},
+    {q:'[Dec 2022] NOT characteristic of ethical decision:',o:['Transparency','Fairness','Profit at any cost','Accountability'],a:2},
+    {q:'[June 2022] Whistle-blowing means:',o:['Reporting misconduct to authorities','Celebrating','Warning competitors','None'],a:0},
+   ]},
+   {id:'cpa',name:'Consumer Protection',icon:'🛒',day:36,opt:false,qs:[
+    {q:'[June 2023] State Commission hears claims up to:',o:['₹1 crore','₹1-10 crore','Above ₹10 crore','No limit'],a:1},
+    {q:'[Dec 2022] NOT unfair trade practice:',o:['False representation','Deceptive packaging','Honest advertising','Misleading comparison'],a:2},
+    {q:'[June 2022] Product liability covers:',o:['Manufacturer only','Seller only','Service provider only','All three'],a:3},
+   ]},
+   {id:'soga',name:'Sale of Goods Act',icon:'🛍',day:36,opt:true,skipPair:'ica',qs:[
+    {q:'[June 2023] "Nemo dat quod non habet" means:',o:['Buyer beware','No one gives better title than they have','Seller must disclose','Risk follows ownership'],a:1},
+    {q:'[Dec 2022] Implied condition in sale by description:',o:['Correspond to description','Merchantable quality','Both A and B','Neither'],a:2},
+    {q:'[June 2022] Risk passes with property unless:',o:['Parties agree otherwise','In transit','Buyer paid','Delivery pending'],a:0},
+   ]},
+  ],
+  boss:{id:'lawboss',name:'LEGAL DRAGON',icon:'⚖',qs:[
+   {q:'[June 2023 Paper] Sec 149(1) listed company independent directors:',o:['1/4','1/3','1/2','All'],a:1},
+   {q:"[Dec 2022 Paper] Minor's agreement:",o:['Void ab initio',"Voidable at minor's option",'Valid after majority','Ratifiable on majority'],a:0},
+   {q:'[June 2022 Paper] Noting and protesting applies to:',o:['Cheques only','Bills of exchange and promissory notes','All NI','Demand drafts'],a:1},
+   {q:'[Dec 2021 Paper] CSR applies when net profit ≥:',o:['₹1 crore','₹5 crore','₹10 crore','₹50 crore'],a:1},
+   {q:'[June 2021 Paper] Gap between two AGMs not to exceed:',o:['6 months','12 months','15 months','18 months'],a:2},
+  ]}
+ },
+ {id:'dt',name:'TAX DUNGEON',color:'#200a00',border:'#F0997B',mapX:6,mapY:6,mapW:4,mapH:4,badge:'🧾',badgeName:'Tax Badge',
+  topics:[
+   {id:'res',name:'Residential Status',icon:'🏠',day:30,opt:false,qs:[
+    {q:'[June 2023] Resident if stay ≥ ___ days in PY:',o:['60','90','182','120'],a:2},
+    {q:'[Dec 2022] NOR if NRI for at least:',o:['5 of 10 years','7 of 10 years','All 10 years','2 of 5 years'],a:1},
+    {q:'[June 2022] Income outside India to ROR:',o:['Exempt','Taxable','Only if remitted','Concessional rate'],a:1},
+   ]},
+   {id:'sal',name:'Income from Salary',icon:'💼',day:31,opt:false,qs:[
+    {q:'[June 2023] Standard deduction AY 2024-25:',o:['₹40K','₹50K','₹75K','₹1L'],a:1},
+    {q:'[Dec 2022] Government employee gratuity:',o:['Fully taxable','Fully exempt','Partly exempt ₹20L','Above ₹10L taxable'],a:1},
+    {q:'[June 2022] NOT one of three HRA conditions:',o:['Actual HRA','50% basic metro','Rent − 10% basic','100% rent paid'],a:3},
+   ]},
+   {id:'hp',name:'House Property',icon:'🏡',day:34,opt:false,qs:[
+    {q:'[June 2023] SOP annual value:',o:['Market rent','Municipal value','Nil','Fair rent'],a:2},
+    {q:'[Dec 2022] 30% standard deduction on:',o:['Net annual value','Gross annual value','Municipal taxes','Expected rent'],a:0},
+    {q:'[June 2022] Max interest deduction SOP housing loan:',o:['₹1L','₹1.5L','₹2L','₹3L'],a:2},
+   ]},
+   {id:'cg',name:'Capital Gains',icon:'📈',day:36,opt:false,qs:[
+    {q:'[June 2023] Listed equity held > 12 months is:',o:['Short-term','Long-term','Exempt','Speculative'],a:1},
+    {q:'[Dec 2022] LTCG listed equity above ₹1L — tax rate:',o:['10% no indexation','20% with indexation','15%','Exempt'],a:0},
+    {q:'[June 2022] Section 54 exemption for:',o:['Any asset','Residential property','Agricultural land','Gold'],a:1},
+   ]},
+   {id:'ded',name:'Chapter VI-A',icon:'💸',day:38,opt:false,qs:[
+    {q:'[June 2023] Max 80C+80CCC+80CCD(1) combined:',o:['₹1L','₹1.5L','₹2L','₹2.5L'],a:1},
+    {q:'[Dec 2022] 80D senior citizen (self):',o:['₹25K','₹50K','₹75K','₹1L'],a:1},
+    {q:'[June 2022] PM NRELF 80G deduction:',o:['50%','100% no limit','100% with limit','75%'],a:1},
+   ]},
+   {id:'tds',name:'TDS Provisions',icon:'🏦',day:40,opt:false,qs:[
+    {q:'[June 2023] TDS on salary under Section:',o:['194','192','194A','194C'],a:1},
+    {q:'[Dec 2022] 194A bank interest threshold:',o:['₹5K','₹10K','₹40K','₹50K'],a:2},
+    {q:'[June 2022] Form 16 issued by:',o:['Employee to employer','Employer to employee','Bank to depositor','Deductor to payee'],a:1},
+   ]},
+   {id:'pgbp',name:'PGBP Basics',icon:'💹',day:43,opt:true,skipPair:'cg',qs:[
+    {q:'[June 2023] IT depreciation on:',o:['Cost','Opening WDV of block','Closing WDV','Average WDV'],a:1},
+    {q:'[Dec 2022] Sec 40A(3) cash payment disallowed if >',o:['₹10K','₹20K','₹35K transporters','A or C per case'],a:3},
+    {q:'[June 2022] Depreciation NOT on:',o:['Plant','Land','Furniture','Computers'],a:1},
+   ]},
+  ],
+  boss:{id:'dtboss',name:'TAX DEMON',icon:'🧾',qs:[
+   {q:'[June 2023 Paper] Salary ₹6L,HRA ₹1L,Rent ₹1.2L,Mumbai. HRA exempt?',o:['₹1L','₹90K','₹60K','₹72K'],a:1},
+   {q:'[Dec 2022 Paper] Indexed cost ₹8L, sale ₹15L. LTCG @ 20%?',o:['₹1L','₹1.4L','₹3L','₹1.2L'],a:1},
+   {q:'[June 2022 Paper] Gross rent ₹3L, municipal tax ₹20K. NAV?',o:['₹3L','₹2.8L','₹2.1L','₹2.52L'],a:1},
+   {q:'[Dec 2021 Paper] 80C=₹1.2L,80D=₹25K,Gross income=₹6.5L. Taxable?',o:['₹5.05L','₹5.3L','₹5L','₹4.8L'],a:0},
+   {q:'[June 2021 Paper] Private employee gratuity max exempt:',o:['₹10L','₹20L','₹25L','No limit'],a:1},
+  ]}
+ },
+ {id:'idt',name:'GST FORTRESS',color:'#0a0a25',border:'#AFA9EC',mapX:11,mapY:3,mapW:4,mapH:4,badge:'⚡',badgeName:'GST Badge',
+  topics:[
+   {id:'sup',name:'GST Supply',icon:'🔗',day:41,opt:false,qs:[
+    {q:'[June 2023] Supply under GST Section:',o:['5','7','9','12'],a:1},
+    {q:'[Dec 2022] Import of services for business — taxable?',o:["No — import","Yes — even no consideration","Yes for consideration","No — personal"],a:2},
+    {q:'[June 2022] Schedule II covers:',o:['Exempt supplies','Activities treated as supply','Composition scheme','Rates'],a:1},
+   ]},
+   {id:'tos',name:'Time of Supply',icon:'⏰',day:43,opt:false,qs:[
+    {q:'[June 2023] NOT an option for TOS of goods:',o:['Invoice date','Removal date','Payment date','Delivery date'],a:3},
+    {q:'[Dec 2022] TOS services forward charge — earliest of:',o:['Invoice or payment date','Invoice only','Payment only','Contract date'],a:0},
+    {q:'[June 2022] Reverse charge shifts liability to:',o:['Supplier','Recipient','Government','Both'],a:1},
+   ]},
+   {id:'pos',name:'Place of Supply',icon:'📍',day:44,opt:false,qs:[
+    {q:'[June 2023] POS for imported goods:',o:["Importer's location","Customs station","Place of delivery","Origin country"],a:1},
+    {q:'[Dec 2022] Immovable property services POS:',o:["Supplier's location","Property's location","Recipient's location","Contract place"],a:1},
+    {q:'[June 2022] IGST levied on:',o:['Intra-state','Inter-state','Both','Imports only'],a:1},
+   ]},
+   {id:'val',name:'GST Valuation',icon:'💰',day:46,opt:false,qs:[
+    {q:'[June 2023] Transaction value Sec 15:',o:['MRP','Price paid/payable + adjustments','Cost of production','Standard value'],a:1},
+    {q:'[Dec 2022] Post-supply discounts deductible if:',o:['Given in invoice','Agreement before supply + ITC reversed','Year end','Recipient approves'],a:1},
+    {q:'[June 2022] Related party valued under:',o:['Invoice value','Valuation Rules 28-33','Cost + 10%','Market value'],a:1},
+   ]},
+   {id:'itc',name:'Input Tax Credit',icon:'🔄',day:47,opt:false,qs:[
+    {q:'[June 2023] ITC on food and beverages:',o:['Fully eligible','Restaurants only','Blocked Sec 17(5)','With conditions'],a:2},
+    {q:'[Dec 2022] GSTR-2B is:',o:['Return filed by taxpayer','Auto-drafted ITC statement from suppliers','Summary return','Annual return'],a:1},
+    {q:'[June 2022] ITC time limit — earlier of: Sept return due date OR:',o:['December same year','Annual return filing date','March next FY','2 years from invoice'],a:1},
+   ]},
+   {id:'reg',name:'GST Registration',icon:'📝',day:49,opt:false,qs:[
+    {q:'[June 2023] Registration threshold goods normal state:',o:['₹10L','₹20L','₹40L','₹1 crore'],a:2},
+    {q:'[Dec 2022] TDS deductor must register even if:',o:['Below threshold','Turnover zero','GST exempt','Home business'],a:1},
+    {q:'[June 2022] Registration application within ___ days:',o:['7','15','30','60'],a:2},
+   ]},
+   {id:'cus',name:'Customs Duty',icon:'🚢',day:52,opt:false,qs:[
+    {q:'[June 2023] BCD levied under:',o:['Section 3','Section 12 Customs Act 1962','IGST Act','Finance Act'],a:1},
+    {q:'[Dec 2022] CIF = ?',o:['Cost only','Cost + Insurance + Freight','Cost + duty','Cost with tax'],a:1},
+    {q:'[June 2022] Anti-dumping duty protects:',o:['Indian exporters','Domestic industry from cheap imports','Govt revenue','Foreign investors'],a:1},
+   ]},
+   {id:'app',name:'GST Appeals',icon:'⚖',day:52,opt:true,skipPair:'reg',qs:[
+    {q:'[June 2023] First appellate authority GST:',o:['GSTAT','High Court','Commissioner Appeals','Advance Ruling'],a:2},
+    {q:'[Dec 2022] Pre-deposit for GST appeal:',o:['5%','10%','20%','25%'],a:1},
+    {q:'[June 2022] Advance ruling binding on:',o:['All taxpayers in state','Applicant and concerned officer','All officers','High Court'],a:1},
+   ]},
+  ],
+  boss:{id:'idtboss',name:'GST OVERLORD',icon:'⚡',qs:[
+   {q:'[June 2023 Paper] Composite supply rate = principal (18%), Mixed = highest (28%)?',o:['18% both','18% composite 28% mixed','28% both','Blended both'],a:1},
+   {q:'[Dec 2022 Paper] ITC ₹50K claimed. Goods returned. ITC reversal?',o:['Not required','Proportionate','Full ₹50K reversed','Only if credit note issued'],a:2},
+   {q:'[June 2022 Paper] IGST imports ITC available to:',o:['No one','Importer for CGST/SGST/IGST','Exporter only','Government'],a:1},
+   {q:'[Dec 2021 Paper] OIDAR services to unregistered person India POS?',o:["Supplier's location","Recipient's location","Delhi","Deemed India"],a:1},
+   {q:'[June 2021 Paper] Export of goods under GST is:',o:['Exempt supply','Zero-rated supply','Nil-rated supply','Non-taxable supply'],a:1},
+  ]}
+ },
+];
+
+// 80-day milestone tasks
+const DAILY_MS=[
+  {day:1, subj:'cost',text:'Material costing — FIFO, LIFO, EOQ',marks:'12–15 marks',hot:true},
+  {day:3, subj:'cost',text:'Labour costing — piece rate, idle time',marks:'10–12 marks'},
+  {day:5, subj:'cost',text:'Overhead costing — absorption rate',marks:'10–12 marks'},
+  {day:7, subj:'cost',text:'Marginal costing & BEP analysis',marks:'15–18 marks',hot:true},
+  {day:10,subj:'cost',text:'Standard costing & variance analysis',marks:'15–18 marks',hot:true},
+  {day:13,subj:'cost',text:'Budgetary control — flexible budget',marks:'10–12 marks'},
+  {day:15,subj:'cost',text:'Process costing — abnormal loss',marks:'10–12 marks'},
+  {day:17,subj:'cost',text:'Job costing',marks:'5–8 marks'},
+  {day:19,subj:'cost',text:'Contract costing (optional)',marks:'3–5 marks',opt:true},
+  {day:20,subj:'cost',text:'Solve Cost scanner — all chapters',marks:'Revision',hot:true},
+  {day:1, subj:'fa',  text:'AS 1,2,9,10 — concepts & applications',marks:'18–20 marks',hot:true},
+  {day:4, subj:'fa',  text:'AS 15,22,26',marks:'Included',hot:true},
+  {day:6, subj:'fa',  text:'Company final accounts Schedule III',marks:'15–18 marks'},
+  {day:9, subj:'fa',  text:'Cash flow statement AS 3',marks:'10–12 marks',hot:true},
+  {day:11,subj:'fa',  text:'Partnership — admission, retirement',marks:'10–12 marks'},
+  {day:13,subj:'fa',  text:'Amalgamation AS 14',marks:'8–10 marks'},
+  {day:15,subj:'fa',  text:'Consignment & joint venture',marks:'5–8 marks'},
+  {day:17,subj:'fa',  text:'Branch accounts',marks:'5–8 marks'},
+  {day:19,subj:'fa',  text:'Hire purchase or lease (pick one)',marks:'5–8 marks',opt:true},
+  {day:22,subj:'fa',  text:'Solve FA scanner — all chapters',marks:'Revision',hot:true},
+  {day:26,subj:'law', text:'Companies Act — incorporation, MOA',marks:'10–12 marks',hot:true},
+  {day:28,subj:'law', text:'Companies Act — directors, meetings',marks:'10–12 marks',hot:true},
+  {day:30,subj:'law', text:'Indian Contract Act',marks:'10–12 marks'},
+  {day:32,subj:'law', text:'Negotiable Instruments Act',marks:'8–10 marks'},
+  {day:34,subj:'law', text:'Business Ethics — all sections',marks:'10–15 marks',hot:true},
+  {day:36,subj:'law', text:'Consumer Protection Act',marks:'5–8 marks'},
+  {day:30,subj:'dt',  text:'Residential status & incidence',marks:'5–8 marks'},
+  {day:31,subj:'dt',  text:'Income from salary — perquisites',marks:'15–18 marks',hot:true},
+  {day:34,subj:'dt',  text:'House property — SOP and LOP',marks:'10–12 marks',hot:true},
+  {day:36,subj:'dt',  text:'Capital Gains — STCG, LTCG, Sec 54',marks:'10–12 marks',hot:true},
+  {day:38,subj:'dt',  text:'Chapter VI-A — 80C, 80D, 80G',marks:'10–12 marks',hot:true},
+  {day:40,subj:'dt',  text:'TDS — Sec 192, 194A, 194C',marks:'8–10 marks'},
+  {day:40,subj:'idt', text:'GST Supply — Section 7,8,9',marks:'12–15 marks',hot:true},
+  {day:43,subj:'idt', text:'Time & place of supply',marks:'16–20 marks',hot:true},
+  {day:47,subj:'idt', text:'Input Tax Credit — eligibility, blocked',marks:'12–15 marks',hot:true},
+  {day:49,subj:'idt', text:'GST Registration provisions',marks:'5–8 marks'},
+  {day:52,subj:'idt', text:'Customs duty basics',marks:'15–20 marks'},
+  {day:55,subj:'idt', text:'Solve IDT scanner — GST chapters',marks:'Revision',hot:true},
+  {day:51,subj:'cost',text:'Mock Test 1 — Cost Accounting (3 hrs)',marks:'Full paper',hot:true},
+  {day:55,subj:'fa',  text:'Mock Test 2 — Financial Accounting (3 hrs)',marks:'Full paper',hot:true},
+  {day:58,subj:'law', text:'Mock Test 3 — Laws & Ethics (3 hrs)',marks:'Full paper',hot:true},
+  {day:60,subj:'dt',  text:'Mock Test 4 — Direct Taxation (3 hrs)',marks:'Full paper',hot:true},
+  {day:62,subj:'idt', text:'Mock Test 5 — Indirect Tax (3 hrs)',marks:'Full paper',hot:true},
+  {day:71,subj:'cost',text:'ICMAI past paper — Cost (last 3 June)',marks:'Timed',hot:true},
+  {day:72,subj:'fa',  text:'ICMAI past paper — FA (last 3 June)',marks:'Timed',hot:true},
+  {day:80,subj:'cost',text:'EXAM DAY — arrive 30 min early!',marks:'11 Jun 2026',hot:true},
+];
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+const ALL_TOPICS=[];
+ZONES.forEach(z=>{z.topics.forEach(t=>ALL_TOPICS.push({...t,zoneId:z.id,zoneColor:z.color,zoneBorder:z.border}));ALL_TOPICS.push({...z.boss,zoneId:z.id,zoneColor:z.color,zoneBorder:z.border,isBoss:true});});
+function caughtN(){return ALL_TOPICS.filter(t=>G.caught[t.id]&&G.caught[t.id]!=='skip').length;}
+function dayNum(){const t=new Date();t.setHours(0,0,0,0);const s=new Date(G.startDate);s.setHours(0,0,0,0);return Math.max(1,Math.floor((t-s)/86400000)+1);}
+function daysLeft(){const e=new Date('2026-06-11');e.setHours(0,0,0,0);const t=new Date();t.setHours(0,0,0,0);return Math.max(0,Math.ceil((e-t)/86400000));}
+function save(){SS('cmaq_v4',G);}
+
+// ═══════════════════════════════════════════
+// SPRITES
+// ═══════════════════════════════════════════
+function mon(id,sz=80,caught=false){
+  const PAL={cost:['#5DCAA5','#2a8a65','#0a3020'],fa:['#85B7EB','#3a6aaa','#0a2050'],law:['#EF9F27','#aa6a00','#3a2000'],dt:['#F0997B','#aa5a2a','#3a1000'],idt:['#AFA9EC','#6a60bb','#1a1a4a'],boss:['#FFD700','#aa8800','#3a2a00']};
+  const zone=id.includes('boss')?'boss':['mat','lab','oh','mc','sc','bc','proc','job','con'].includes(id)?'cost':['as1','as2','cfa','cfs','part','amal','cons','brnch','ins'].includes(id)?'fa':['co1','co2','ica','nia','eth','cpa','soga'].includes(id)?'law':['res','sal','hp','cg','ded','tds','pgbp'].includes(id)?'dt':'idt';
+  const c=PAL[zone];
+  const sd=id.split('').reduce((a,b)=>a+b.charCodeAt(0),0);
+  const r=n=>((sd*(n+7)*13)%7)-3;
+  const glow=caught?`filter:drop-shadow(0 0 8px ${c[0]})`:'';
+  if(id.includes('boss'))return`<svg width="${sz}" height="${sz}" viewBox="0 0 64 64" style="${glow}"><polygon points="32,3 44,18 60,22 48,35 52,52 32,43 12,52 16,35 4,22 20,18" fill="${c[0]}" stroke="${c[1]}" stroke-width="2"/><circle cx="32" cy="29" r="13" fill="${c[1]}"/><circle cx="25" cy="25" r="4" fill="${c[2]}"/><circle cx="39" cy="25" r="4" fill="${c[2]}"/><circle cx="25" cy="25" r="2" fill="#fff"/><circle cx="39" cy="25" r="2" fill="#fff"/><path d="M23 35 Q32 42 41 35" stroke="#fff" stroke-width="2" fill="none"/><text x="32" y="59" text-anchor="middle" font-size="7" fill="${c[0]}" font-family="monospace">★BOSS★</text></svg>`;
+  const by=18+r(1);
+  return`<svg width="${sz}" height="${sz}" viewBox="0 0 64 64" style="${glow}"><ellipse cx="32" cy="${by+19}" rx="${13+r(2)}" ry="${9+r(3)}" fill="${c[0]}" stroke="${c[1]}" stroke-width="1.5"/><circle cx="32" cy="${by}" r="${11+r(4)}" fill="${c[0]}" stroke="${c[1]}" stroke-width="1.5"/><circle cx="${26+r(5)}" cy="${by-2}" r="3" fill="${c[2]}"/><circle cx="${38+r(6)}" cy="${by-2}" r="3" fill="${c[2]}"/><circle cx="${26+r(5)}" cy="${by-2}" r="1.5" fill="#fff"/><circle cx="${38+r(6)}" cy="${by-2}" r="1.5" fill="#fff"/><path d="M${27+r(7)} ${by+5} Q32 ${by+9} ${37+r(8)} ${by+5}" stroke="${c[2]}" stroke-width="1.5" fill="none"/>${caught?`<text x="32" y="60" text-anchor="middle" font-size="7" fill="${c[0]}" font-family="monospace">✓</text>`:''}</svg>`;
+}
+function playerSvg(sz=60){return`<svg width="${sz}" height="${sz}" viewBox="0 0 64 64"><circle cx="32" cy="16" r="10" fill="#f5c5a0" stroke="#333" stroke-width="1.5"/><rect x="22" y="26" width="20" height="16" rx="3" fill="#2244aa" stroke="#333" stroke-width="1.5"/><rect x="14" y="27" width="9" height="13" rx="3" fill="#2244aa" stroke="#333" stroke-width="1"/><rect x="41" y="27" width="9" height="13" rx="3" fill="#2244aa" stroke="#333" stroke-width="1"/><rect x="24" y="42" width="7" height="11" rx="3" fill="#1a1a33" stroke="#333" stroke-width="1"/><rect x="33" y="42" width="7" height="11" rx="3" fill="#1a1a33" stroke="#333" stroke-width="1"/><circle cx="27" cy="14" r="2" fill="#333"/><circle cx="37" cy="14" r="2" fill="#333"/><path d="M27 20 Q32 23 37 20" stroke="#333" stroke-width="1.5" fill="none"/></svg>`;}
+
+// ═══════════════════════════════════════════
+// SCREEN MANAGEMENT
+// ═══════════════════════════════════════════
+let prevScreen='menu';
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id+'Screen').classList.add('on');
+  if(id==='menu'){renderMenu();if(mapAnim){cancelAnimationFrame(mapAnim);mapAnim=null;}}
+  if(id==='ow'){drawMap();startMapLoop();}
+  if(id==='dex')renderDex();
+  if(id==='oak'){snd('oak');document.getElementById('oakImgPreview').style.display='none';document.getElementById('oakAskBtn').style.display='none';document.getElementById('oakAnswer').style.display='none';document.getElementById('oakLoading').style.display='none';oakImageB64=null;}
+  prevScreen=id;
+}
+function goBack(){showScreen('menu');}
+
+// ═══════════════════════════════════════════
+// MAIN MENU
+// ═══════════════════════════════════════════
+function renderMenu(){
+  const d=dayNum(),left=daysLeft();
+  // Guard: ensure all elements exist
+  if(!document.getElementById('ms-day'))return;
+  document.getElementById('ms-day').textContent=Math.min(d,80);
+  document.getElementById('ms-caught').textContent=caughtN();
+  document.getElementById('ms-xp').textContent=G.xp;
+  document.getElementById('ms-streak').textContent=G.streak||0;
+  document.getElementById('cdDays').textContent=left;
+  document.getElementById('menuMascot').innerHTML=mon('mc',80);
+  // progress
+  const tot=ALL_TOPICS.length,done=caughtN(),pct=tot?Math.round(done/tot*100):0;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-text').textContent=`${done} / ${tot}`;
+  // badges
+  renderBadges();
+  // today tasks
+  renderTodayTasks(d);
+}
+
+function renderBadges(){
+  const row=document.getElementById('badgesRow');
+  row.innerHTML='';
+  ZONES.forEach(z=>{
+    const allCaught=z.topics.every(t=>G.caught[t.id]||G.skipped[t.id]);
+    const bossCaught=!!G.caught[z.boss.id];
+    const earned=allCaught&&bossCaught;
+    const wrap=document.createElement('div');wrap.style.textAlign='center';
+    wrap.innerHTML=`<div class="gym-badge${earned?' earned':''}">${z.badge}</div><div class="gym-badge-lbl">${z.badgeName}</div>`;
+    row.appendChild(wrap);
+  });
+}
+
+function renderTodayTasks(d){
+  let tasks=DAILY_MS.filter(m=>m.day===d);
+  if(!tasks.length)tasks=DAILY_MS.filter(m=>m.day>=d&&!G.done[m.day+'_'+m.subj]).slice(0,3);
+  const container=document.getElementById('todayTasks');
+  if(!tasks.length){container.innerHTML='<div style="font-family:var(--FB);font-size:16px;color:var(--muted);text-align:center;padding:12px 0">All caught up! Keep revising ✓</div>';return;}
+  container.innerHTML=tasks.map(m=>{
+    const key=m.day+'_'+m.subj;const done=!!G.done[key];
+    const zone=ZONES.find(z=>z.id===m.subj);const color=zone?zone.border:'#aaa';
+    return`<div class="task-card${done?' done':''}" onclick="toggleTask('${key}')">
+      <div class="tc-chk">${done?'✓':''}</div>
+      <div class="tc-body">
+        <div class="tc-text" style="color:${done?'var(--muted)':color}">${m.text}</div>
+        <div class="tc-meta">Day ${m.day} · ${zone?zone.name:'?'} · ${m.marks}</div>
+      </div>
+      ${m.hot?'<div class="tc-badge hot-b">★ HOT</div>':m.opt?'<div class="tc-badge opt-b">SKIP?</div>':''}
+    </div>`;
+  }).join('');
+}
+
+function toggleTask(key){
+  G.done[key]=!G.done[key];
+  if(G.done[key]){G.xp+=10;snd('menu');}
+  const today=new Date().toDateString();
+  if(G.lastTick!==today){const yd=new Date();yd.setDate(yd.getDate()-1);G.streak=(G.lastTick===yd.toDateString()?(G.streak||0)+1:1);G.lastTick=today;}
+  save();renderMenu();
+  toast(G.done[key]?'✓ Task done! +10 XP':'Task unchecked');
+}
+
+// ═══════════════════════════════════════════
+// OVERWORLD MAP
+// ═══════════════════════════════════════════
+const TILE=32;
+let mapCanvas,mapCtx,mapAnim,lastF=0;
+let player={x:7,y:5,frame:0};
+let mapKeys={};
+
+function initMap(){
+  if(mapCtx)return;  // Already initialised
+  mapCanvas=document.getElementById('mapCanvas');
+  mapCtx=mapCanvas.getContext('2d');
+  window.addEventListener('resize',()=>{if(mapCanvas&&document.getElementById('owScreen').classList.contains('on')){mapCanvas.width=mapCanvas.offsetWidth;mapCanvas.height=mapCanvas.offsetHeight;drawMap();}});
+  mapCanvas.addEventListener('click',onMapClick);
+  mapCanvas.addEventListener('touchend',e=>{e.preventDefault();const t=e.changedTouches[0];onMapClick({clientX:t.clientX,clientY:t.clientY});},{passive:false});
+  window.addEventListener('keydown',e=>{mapKeys[e.key]=true;});
+  window.addEventListener('keyup',e=>{delete mapKeys[e.key];});
+}
+
+function startMapLoop(){
+  if(!mapCanvas)return;
+  mapCanvas.width=mapCanvas.offsetWidth;mapCanvas.height=mapCanvas.offsetHeight;
+  function loop(ts){
+    if(!document.getElementById('owScreen').classList.contains('on')){mapAnim=null;return;}
+    if(ts-lastF>120){lastF=ts;player.frame=(player.frame+1)%4;handleKeys();}
+    drawMap();
+    mapAnim=requestAnimationFrame(loop);
+  }
+  mapAnim=requestAnimationFrame(loop);
+}
+
+function handleKeys(){
+  let moved=false;
+  if(mapKeys['ArrowLeft']||mapKeys['a']){player.x=Math.max(0,player.x-1);moved=true;}
+  if(mapKeys['ArrowRight']||mapKeys['d']){player.x=Math.min(15,player.x+1);moved=true;}
+  if(mapKeys['ArrowUp']||mapKeys['w']){player.y=Math.max(0,player.y-1);moved=true;}
+  if(mapKeys['ArrowDown']||mapKeys['s']){player.y=Math.min(9,player.y+1);moved=true;}
+  if(moved&&player.frame===0)snd('walk');
+}
+
+function onMapClick(e){
+  const rect=mapCanvas.getBoundingClientRect();
+  const cx=e.clientX-rect.left,cy=e.clientY-rect.top;
+  const cw=mapCanvas.width,ch=mapCanvas.height;
+  const offX=(cw-16*TILE)/2,offY=(ch-10*TILE)/2;
+  const tx=Math.floor((cx-offX)/TILE),ty=Math.floor((cy-offY)/TILE);
+  ZONES.forEach(z=>{if(tx>=z.mapX&&tx<z.mapX+z.mapW&&ty>=z.mapY&&ty<z.mapY+z.mapH){snd('battle');enterZone(z.id);}});
+}
+
+function drawMap(){
+  if(!mapCtx||!mapCanvas)return;
+  const cw=mapCanvas.width,ch=mapCanvas.height;
+  const offX=(cw-16*TILE)/2,offY=(ch-10*TILE)/2;
+  mapCtx.fillStyle='#060d06';mapCtx.fillRect(0,0,cw,ch);
+  for(let x=0;x<16;x++)for(let y=0;y<10;y++){
+    mapCtx.fillStyle=(x+y)%2===0?'#0c1a0c':'#0f1e0f';
+    mapCtx.fillRect(offX+x*TILE,offY+y*TILE,TILE,TILE);
+  }
+  ZONES.forEach(z=>{
+    const caught=z.topics.filter(t=>G.caught[t.id]).length;
+    const total=z.topics.length;
+    mapCtx.fillStyle=z.color;mapCtx.fillRect(offX+z.mapX*TILE,offY+z.mapY*TILE,z.mapW*TILE,z.mapH*TILE);
+    mapCtx.strokeStyle=z.border;mapCtx.lineWidth=3;
+    mapCtx.strokeRect(offX+z.mapX*TILE,offY+z.mapY*TILE,z.mapW*TILE,z.mapH*TILE);
+    mapCtx.fillStyle=z.border;mapCtx.font='bold 8px "Press Start 2P",monospace';mapCtx.textAlign='center';
+    const lines=z.name.split(' ');
+    lines.forEach((l,i)=>mapCtx.fillText(l,offX+(z.mapX+z.mapW/2)*TILE,offY+(z.mapY+z.mapH/2)*TILE-6+i*13));
+    // progress bar
+    mapCtx.fillStyle='#1a1a1a';mapCtx.fillRect(offX+(z.mapX+.4)*TILE,offY+(z.mapY+z.mapH-.7)*TILE,(z.mapW-.8)*TILE,7);
+    mapCtx.fillStyle=z.border;mapCtx.fillRect(offX+(z.mapX+.4)*TILE,offY+(z.mapY+z.mapH-.7)*TILE,(z.mapW-.8)*TILE*caught/Math.max(total,1),7);
+    if(G.caught[z.boss.id]){mapCtx.fillStyle='#FFD700';mapCtx.font='14px monospace';mapCtx.fillText('★',offX+(z.mapX+z.mapW-.7)*TILE,offY+(z.mapY+.8)*TILE);}
+    // badge earned glow
+    const allDone=z.topics.every(t=>G.caught[t.id]||G.skipped[t.id]);
+    if(allDone&&G.caught[z.boss.id]){mapCtx.shadowColor=z.border;mapCtx.shadowBlur=12;mapCtx.strokeRect(offX+z.mapX*TILE,offY+z.mapY*TILE,z.mapW*TILE,z.mapH*TILE);mapCtx.shadowBlur=0;}
+  });
+  // player
+  const px=offX+player.x*TILE,py=offY+player.y*TILE,f=player.frame%2;
+  mapCtx.fillStyle='rgba(0,0,0,.35)';mapCtx.beginPath();mapCtx.ellipse(px+TILE/2,py+TILE*.88,11,5,0,0,Math.PI*2);mapCtx.fill();
+  mapCtx.fillStyle='#f5c5a0';mapCtx.fillRect(px+11,py+3,12,11);
+  mapCtx.fillStyle='#2244aa';mapCtx.fillRect(px+9,py+13,14,11);
+  mapCtx.fillStyle='#1a1a33';mapCtx.fillRect(px+9,py+23,6,7+f);mapCtx.fillRect(px+17,py+23,6,7+(1-f));
+  mapCtx.fillStyle='#333';mapCtx.fillRect(px+13,py+6,3,3);mapCtx.fillRect(px+18,py+6,3,3);
+}
+
+// ═══════════════════════════════════════════
+// ZONE & BATTLE
+// ═══════════════════════════════════════════
+function enterZone(zoneId){
+  const zone=ZONES.find(z=>z.id===zoneId);if(!zone)return;
+  const next=zone.topics.find(t=>!G.caught[t.id]&&!G.skipped[t.id]);
+  if(next){startBattle(next,zone,false);return;}
+  if(!G.caught[zone.boss.id]){startBattle(zone.boss,zone,true);return;}
+  toast(`✅ ${zone.name} complete! Badge earned!`);snd('badge');
+}
+function quickBattle(){
+  for(const zone of ZONES){
+    const next=zone.topics.find(t=>!G.caught[t.id]&&!G.skipped[t.id]);
+    if(next){snd('battle');startBattle(next,zone,false);return;}
+    if(!G.caught[zone.boss.id]){snd('boss');startBattle(zone.boss,zone,true);return;}
+  }
+  toast('🎉 All topics caught! You are ready for June 2026!');snd('levelup');
+}
+
+let B={topic:null,zone:null,boss:false,qs:[],qi:0,correct:0,need:3,ehp:100,php:100,ans:false};
+function startBattle(topic,zone,isBoss){
+  B={topic,zone,boss:isBoss||!!topic.isBoss,qs:[...topic.qs],qi:0,correct:0,need:isBoss||topic.isBoss?5:3,ehp:100,php:100,ans:false};
+  showScreen('battle');
+  // Small delay to ensure screen transition completes
+  document.getElementById('btl-topbar-title').textContent=topic.name.toUpperCase();
+  document.getElementById('eiName').textContent=topic.name.toUpperCase();
+  document.getElementById('eSpr').innerHTML=mon(topic.id,90,false);
+  document.getElementById('pSpr').innerHTML=playerSvg(60);
+  document.getElementById('btlBg').style.background=`linear-gradient(180deg,#0a0a22 0%,${zone.color}99 60%,${zone.color} 100%)`;
+  setHp('ehp',100);setHp('php',100);updateXpBar();
+  document.getElementById('skipBtn').style.display=topic.optional?'inline-block':'none';
+  if(B.boss)snd('boss');
+  setDialog(B.boss?`⚠ BOSS BATTLE!\n${topic.name} challenges you!\nAnswer all 5 to defeat it!`:`${topic.icon||'📚'} Wild ${topic.name} appeared!\nAnswer ${B.need} correctly to catch it!`,true,()=>showQ());
+}
+
+function showQ(){
+  if(B.correct>=B.need){catchTopic();return;}
+  if(B.php<=0){battleFailed();return;}
+  if(B.qi>=B.qs.length)B.qi=0;
+  const q=B.qs[B.qi];B.ans=false;
+  const left=B.need-B.correct;
+  document.getElementById('qcount').textContent=`Q${B.qi+1} · Need ${left} more correct · ${B.correct}/${B.need} done`;
+  document.getElementById('btl-progress-hdr').textContent=`${B.correct}/${B.need}`;
+  document.getElementById('dialogTxt').textContent=q.q;
+  document.getElementById('btl-actions').style.display='none';document.getElementById('skipBtn').style.display='none';
+  const grid=document.getElementById('optsGrid');grid.innerHTML='';
+  const labels=['A','B','C','D'];
+  // Render real answer options A,B,C
+  q.o.slice(0,3).forEach((opt,i)=>{
+    const d=document.createElement('div');d.className='opt';
+    d.innerHTML=`<span class="opt-k">${labels[i]}</span><span class="opt-t">${opt}</span>`;
+    d.onclick=()=>pickAnswer(i,q.a,d,grid);
+    grid.appendChild(d);
+  });
+  // Option D is always the 4th answer option if it exists, else flee
+  if(q.o.length>=4){
+    const d=document.createElement('div');d.className='opt';
+    d.innerHTML=`<span class="opt-k">D</span><span class="opt-t">${q.o[3]}</span>`;
+    d.onclick=()=>pickAnswer(3,q.a,d,grid);
+    grid.appendChild(d);
+  } else {
+    // D = flee
+    const d=document.createElement('div');d.className='opt';
+    d.style.cssText='background:var(--r1);border-color:var(--r3);';
+    d.innerHTML=`<span class="opt-k" style="color:var(--r4)">D</span><span class="opt-t" style="color:var(--r4)">✕ FLEE from battle</span>`;
+    d.onclick=()=>confirmFlee();
+    grid.appendChild(d);
+  }
+  // Show skip button row only for optional topics
+  const ba=document.getElementById('btl-actions');
+  const skipBtn=document.getElementById('skipBtn');
+  if(B.topic&&B.topic.optional){
+    skipBtn.style.display='inline-block';
+    ba.style.display='flex';
+  } else {
+    skipBtn.style.display='none';
+    ba.style.display='none';
+  }
+}
+
+function pickAnswer(chosen,correct,btn,grid){
+  if(B.ans)return;B.ans=true;
+  grid.querySelectorAll('.opt').forEach(o=>o.onclick=null);
+  if(chosen===correct){
+    btn.classList.add('ok');B.correct++;
+    B.ehp=Math.max(0,B.ehp-(B.boss?20:34));setHp('ehp',B.ehp);
+    document.getElementById('dialogTxt').textContent=['⚡ Correct!','✓ Right answer!','Great!','Spot on! ★'][Math.floor(Math.random()*4)];
+    flashBg('#0a2a0a');snd('correct');
+    spawnSparkles();
+  } else {
+    btn.classList.add('ng');grid.querySelectorAll('.opt')[correct]?.classList.add('ok');
+    B.php=Math.max(0,B.php-(B.boss?25:30));setHp('php',B.php);
+    document.getElementById('dialogTxt').textContent=`✗ Wrong! Correct: ${B.qs[B.qi].o[correct]}`;
+    flashBg('#2a0a0a');snd('wrong');
+  }
+  B.qi++;
+  setTimeout(()=>{
+    if(!document.getElementById('battleScreen').classList.contains('on'))return;
+    if(B.correct>=B.need)catchTopic();
+    else if(B.php<=0)battleFailed();
+    else showQ();
+  },1500);
+}
+
+function spawnSparkles(){
+  const scene=document.querySelector('.btl-scene');
+  ['⭐','✨','💫','⚡'].forEach((s,i)=>{
+    const sp=document.createElement('div');sp.className='sparkle';sp.textContent=s;
+    sp.style.cssText=`left:${20+Math.random()*60}%;top:${10+Math.random()*40}%;animation-delay:${i*.1}s`;
+    scene.appendChild(sp);setTimeout(()=>sp.remove(),1000);
+  });
+}
+
+function setDialog(text,clickable=true,cb=null){
+  document.getElementById('dialogTxt').textContent=text;
+  document.getElementById('qcount').textContent='';
+  document.getElementById('optsGrid').innerHTML='';
+  document.getElementById('btl-actions').style.display='none';document.getElementById('skipBtn').style.display='none';
+  if(cb){
+    const el=document.getElementById('dialogBox');
+    const h=()=>{el.removeEventListener('click',h);cb();};
+    setTimeout(()=>el.addEventListener('click',h),400);
+    setTimeout(h,2200);
+  }
+}
+function setHp(id,pct){const el=document.getElementById(id);el.style.width=pct+'%';el.style.background=pct>50?'var(--hp-g)':pct>20?'var(--hp-y)':'var(--hp-r)';}
+function flashBg(color){const el=document.getElementById('btlBg');el.style.background=color;setTimeout(()=>el.style.background=`linear-gradient(180deg,#0a0a22 0%,${B.zone.color}99 60%,${B.zone.color} 100%)`,220);}
+function updateXpBar(){const p=Math.min(100,(G.xp%100));document.getElementById('xpFill').style.width=p+'%';document.getElementById('xpVal').textContent=G.xp+' XP';}
+
+function catchTopic(){
+  const cl=document.getElementById('catchLayer');cl.classList.add('on');
+  document.getElementById('catchBall').textContent='🎯';
+  document.getElementById('catchTxt').textContent=`Catching ${B.topic.name}...`;
+  snd('catch');
+  setTimeout(()=>{document.getElementById('catchTxt').textContent=`${B.topic.icon||'✓'} ${B.topic.name}\nADDED TO DEX!`;document.getElementById('catchBall').textContent='✅';snd('levelup');},900);
+  setTimeout(()=>{cl.classList.remove('on');showResult(true);},2200);
+  G.caught[B.topic.id]=true;G.xp+=B.boss?200:50;save();
+  // Check badge after save
+  const zone=ZONES.find(z=>z.id===B.zone.id);
+  if(zone){
+    const allTopics=zone.topics.every(t=>G.caught[t.id]||G.skipped[t.id]);
+    const bossBeaten=!!G.caught[zone.boss.id];
+    if(allTopics&&bossBeaten){
+      setTimeout(()=>{snd('badge');toast('🏆 '+zone.badgeName+' EARNED! BADGE UNLOCKED!');renderBadges();},2500);
+    }
+  }
+}
+function battleFailed(){snd('flee');showResult(false);}
+
+function showResult(won){
+  showScreen('result');const xp=B.boss?200:50;
+  if(won){
+    document.getElementById('resIcon').textContent=B.boss?'👑':'🎉';
+    document.getElementById('resTitle').textContent=B.boss?'BOSS DEFEATED!':'TOPIC CAUGHT!';
+    document.getElementById('resTitle').style.color='#FFD700';
+    document.getElementById('resXp').textContent=`+${xp} XP`;
+    document.getElementById('resMsg').textContent=B.boss?`${B.zone.name} conquered! You earned the ${B.zone.badgeName}!`:`${B.topic.icon||'✓'} ${B.topic.name} added to your Topic Dex!\n${B.correct}/${B.need} correct.`;
+    document.getElementById('resBtn').textContent='CONTINUE ►';
+  }else{
+    document.getElementById('resIcon').textContent='💀';
+    document.getElementById('resTitle').textContent='DEFEATED...';
+    document.getElementById('resTitle').style.color='#cc2222';
+    document.getElementById('resXp').textContent='';
+    document.getElementById('resMsg').textContent=`${B.topic.name} was too strong!\nStudy this topic and try again.`;
+    document.getElementById('resBtn').textContent='TRY AGAIN ►';
+  }
+  updateXpBar();
+}
+function afterResult(){showScreen('menu');renderMenu();}
+function doSkip(){
+  if(!B.topic||!B.topic.optional){toast('Cannot skip!');return;}
+  if(G.skipped[B.topic.skipPair]){toast('⚠ Cannot skip — paired topic already skipped!');return;}
+  G.skipped[B.topic.id]=true;G.caught[B.topic.id]='skip';save();
+  snd('back');toast(`⏩ ${B.topic.name} skipped`);showScreen('menu');
+}
+function confirmFlee(){snd('back');document.getElementById('fleeOverlay').classList.add('on');}
+function closeFlee(){document.getElementById('fleeOverlay').classList.remove('on');snd('menu');}
+function doFlee(){document.getElementById('fleeOverlay').classList.remove('on');snd('flee');showScreen('menu');}
+
+// ═══════════════════════════════════════════
+// POKEDEX
+// ═══════════════════════════════════════════
+function renderDex(){
+  const grid=document.getElementById('dexGrid');grid.innerHTML='';
+  let n=1;document.getElementById('dexCount').textContent=`${caughtN()}/${ALL_TOPICS.length}`;
+  ZONES.forEach(zone=>{
+    zone.topics.forEach(t=>{
+      const caught=G.caught[t.id];const skip=caught==='skip';
+      const d=document.createElement('div');d.className=`dc${caught&&!skip?' caught':''}${skip?' skipped':''}`;
+      d.innerHTML=`<div class="dc-num">#${String(n).padStart(3,'0')}</div><div style="text-align:center">${mon(t.id,56,!!caught)}</div><div class="dc-name">${t.icon||'📚'} ${t.name}</div><div class="dc-status" style="color:${caught&&!skip?zone.border:skip?'#555':'#333'}">${caught&&!skip?'✓ CAUGHT':skip?'SKIPPED':'???'}</div><div style="font-family:var(--FB);font-size:11px;color:${zone.border};margin-top:3px">${zone.name}</div>`;
+      d.onclick=()=>{snd('battle');if(skip){toast('Topic skipped — cannot battle');return;}enterZoneAndBattle(zone.id);};
+      grid.appendChild(d);n++;
+    });
+    const boss=zone.boss,bc=G.caught[boss.id];
+    const bd=document.createElement('div');bd.className=`dc${bc?' boss-c':''}`;bd.style.borderColor=bc?'#FFD700':'#2a2a1a';
+    bd.innerHTML=`<div class="dc-num">★BOSS</div><div style="text-align:center">${mon(boss.id,56,!!bc)}</div><div class="dc-name">👑 ${boss.name}</div><div class="dc-status" style="color:${bc?'#FFD700':'#444'}">${bc?'★ DEFEATED':'LOCKED'}</div>`;
+    bd.onclick=()=>{if(!bc){snd('boss');startBattle(boss,zone,true);}};
+    grid.appendChild(bd);n++;
+  });
+}
+function enterZoneAndBattle(zoneId){const zone=ZONES.find(z=>z.id===zoneId);if(zone)enterZone(zoneId);}
+
+// ═══════════════════════════════════════════
+// PROFESSOR OAK AI
+// ═══════════════════════════════════════════
+let oakImageB64=null;
+
+function triggerUpload(){document.getElementById('fileInput').click();}
+
+document.getElementById('fileInput').addEventListener('change',function(){
+  const file=this.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    oakImageB64=e.target.result.split(',')[1];
+    const preview=document.getElementById('oakImgPreview');
+    preview.src=e.target.result;preview.style.display='block';
+    document.getElementById('oakAskBtn').style.display='block';
+    document.getElementById('oakAnswer').style.display='none';
+    toast('📸 Photo loaded! Tap ASK PROF. OAK');snd('oak');
+  };
+  reader.readAsDataURL(file);
+});
+
+async function askOak(){
+  if(!oakImageB64){toast('Please upload a photo first!');return;}
+  snd('oak');
+  document.getElementById('oakLoading').style.display='block';
+  document.getElementById('oakAnswer').style.display='none';
+  document.getElementById('oakAskBtn').style.display='none';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are Professor Oak, a friendly CMA Inter exam tutor. The student has uploaded a photo of a CMA Inter exam question. Analyse the question and:
+1. Identify the topic and subject (Cost Accounting / Financial Accounting / Laws & Ethics / Direct Tax / Indirect Tax)
+2. Solve it step by step with full workings shown clearly
+3. Explain the key concept behind it in 2-3 simple sentences
+4. If it's a theory question, give section numbers (for Tax/Law questions)
+Keep your response concise and exam-focused. Use simple language. Start with the topic name.`,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:oakImageB64}},
+          {type:'text',text:'This is a CMA Inter exam question. Please solve it step by step and explain the concept. Finance Act 2025 applicable for tax questions.'}
+        ]}]
+      })
+    });
+    const data=await res.json();
+    const txt=data.content?.[0]?.text||'Prof. Oak could not read the question clearly. Please try with a clearer photo.';
+    document.getElementById('oakAnswerTxt').textContent=txt;
+    document.getElementById('oakAnswer').style.display='block';
+    snd('levelup');toast('🎓 Prof. Oak answered!');
+  }catch(err){
+    document.getElementById('oakAnswerTxt').textContent='Prof. Oak needs internet to answer. Please check your connection and try again. Or visit claude.ai on your browser and upload your question there — same result!';
+    document.getElementById('oakAnswer').style.display='block';
+  }
+  document.getElementById('oakLoading').style.display='none';
+  document.getElementById('oakAskBtn').style.display='block';
+}
+
+async function quickAsk(prompt){
+  snd('oak');
+  document.getElementById('oakLoading').style.display='block';
+  document.getElementById('oakAnswer').style.display='none';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:800,
+        system:'You are Professor Oak, a friendly CMA Inter exam tutor. Give a concise, exam-focused answer. Use simple language. Include examples where helpful. Format clearly.',
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data=await res.json();
+    const txt=data.content?.[0]?.text||'Please try again.';
+    document.getElementById('oakAnswerTxt').textContent=txt;
+    document.getElementById('oakAnswer').style.display='block';
+    snd('levelup');toast('🎓 Prof. Oak answered!');
+  }catch(err){
+    document.getElementById('oakAnswerTxt').textContent='Prof. Oak is unavailable. Check internet and try again, or visit claude.ai directly.';
+    document.getElementById('oakAnswer').style.display='block';
+  }
+  document.getElementById('oakLoading').style.display='none';
+  document.getElementById('oakImgPreview').style.display='none';
+}
+
+// ═══════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════
+let tTimer=null;
+function toast(msg){
+  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');
+  if(tTimer)clearTimeout(tTimer);
+  tTimer=setTimeout(()=>el.classList.remove('on'),3500);
+}
+
+// ═══════════════════════════════════════════
+// STARS
+// ═══════════════════════════════════════════
+function initStars(){
+  const c=document.getElementById('stars');
+  for(let i=0;i<70;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=Math.random()*2.5+.5;
+    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;animation:tw ${Math.random()*2+1}s infinite;animation-delay:${Math.random()*2}s`;
+    c.appendChild(s);
+  }
+}
+
+// ═══════════════════════════════════════════
+// PWA MANIFEST (Play Store via TWA)
+// ═══════════════════════════════════════════
+,
+      {
+        src:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWxMAAAsTAAALEwEAmpwYAAAAB3RJTUUH6AQUCgkV3Tx/7QAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAIQSURBVHja7cExAQAAAMKg9U9tDB+gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaaaaaaa==",
+        sizes:'512x512',
+        type:'image/png',
+        purpose:'any maskable'
+      }
+    ]
+  };
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  document.getElementById('manifestLink').href=url;
+}
+
+// ═══════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════
+window.addEventListener('load',()=>{
+  initStars();initMap();renderMenu();// manifest is static
+  // Unlock audio on first touch
+  document.addEventListener('touchstart',()=>{const c=getCtx();if(c&&c.state==='suspended')c.resume();},{once:true});
+  document.addEventListener('click',()=>{const c=getCtx();if(c&&c.state==='suspended')c.resume();},{once:true});
+  // Double-tap prevention
+  let lt=0;document.addEventListener('touchend',e=>{const n=Date.now();if(n-lt<300)e.preventDefault();lt=n;},{passive:false});
+  // Service Worker for offline
+  if('serviceWorker'in navigator){
+    const sw=`self.addEventListener('install',e=>e.waitUntil(caches.open('cmaq-v1').then(c=>c.add('/'))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));`;
+    const blob=new Blob([sw],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+  }
+  snd('menu');
+});
+</script>
+
+<!-- FLEE OVERLAY -->
+<div id="fleeOverlay">
+  <div class="flee-box">
+    <div class="flee-title">⚠ FLEE BATTLE?</div>
+    <div class="flee-sub">Your progress on this question will be lost. The topic will still be available to battle again.</div>
+    <div class="flee-btns">
+      <button class="flee-yes" onclick="doFlee()">✕ YES, FLEE</button>
+      <button class="flee-no" onclick="closeFlee()">◄ KEEP FIGHTING</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
